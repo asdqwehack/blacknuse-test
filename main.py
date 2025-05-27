@@ -11,7 +11,7 @@ app.config["DISCORD_CLIENT_ID"] = "1128965010568249434"
 app.config["DISCORD_CLIENT_SECRET"] = "AP6aYzagGxkai9SoDzRcpdAR9ej8nfap"
 app.config["DISCORD_OAUTH"] = True
 app.config["DISCORD_OAUTH_SCOPE"] = ['identify']
-app.config["DISCORD_OAUTH_REDIRECT_URI"] = "http://localhost:5000/callback"
+app.config["DISCORD_OAUTH_REDIRECT_URI"] = "http://blacknuse.pro/callback"
 app.config["DISCORD_AUTHORIZATION"] = "MTEyODk2NTAxMDU2ODI0OTQzNA.GfvlVZ.g2GQebNZBbio3sa5wzNguzafxOaOHhrI_cljs4"
 
 Discord = FlaskDiscord(app)
