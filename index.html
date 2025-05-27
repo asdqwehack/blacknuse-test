@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackNuse</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @font-face {
+            font-family: 'KimjungchulGothic-Bold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/KimjungchulGothic-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-primary: #E4E9F7;
+            --bg-secondary: #ffffff;
+            --text-primary: #11101d;
+            --text-secondary: #666;
+            --accent-primary: linear-gradient(135deg, #667eea, #764ba2);
+            --accent-hover: linear-gradient(135deg, #5a6fd8, #6a4190);
+            --border-color: #ddd;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "KimjungchulGothic-Bold";
+        }
+
+        /* 홈페이지 스타일 */
+        .main-layout {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 0;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            backdrop-filter: blur(15px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .container-fluid {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-primary);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .logo h1 {
+            color: white;
+            font-size: 2rem;
+            text-decoration: none;
+        }
+
+        .navigation {
+            display: flex;
+        }
+
+        .navbar-nav {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        .nav-link {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-link:hover {
+            background: rgba(255,255,255,0.1);
+            color: #667eea;
+        }
+
+        .banner_main {
+            padding: 120px 0 80px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .text-bg h1 {
+            font-size: 3.5rem;
+            color: white;
+            margin-bottom: 30px;
+            line-height: 1.2;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .text-bg a {
+            background: var(--accent-primary);
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            display: inline-block;
+        }
+
+        .text-bg a:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .service, .solutions {
+            padding: 80px 0;
+            background: var(--bg-secondary);
+            transition: all 0.3s ease;
+        }
+
+        .service:nth-child(even) {
+            background: var(--bg-primary);
+        }
+
+        .titlepage h2 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+        }
+
+        .titlepage span {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            display: block;
+            margin-bottom: 30px;
+        }
+
+        .read_more {
+            background: var(--accent-primary);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s;
+            box-shadow: var(--shadow-light);
+            display: inline-block;
+        }
+
+        .read_more:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* 로그인/회원가입 페이지 */
+        .auth-layout {
+            display: none;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow-heavy);
+            border: 1px solid var(--border-color);
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-title {
+            font-size: 28px;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .auth-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .auth-button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .auth-button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .auth-switch {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .auth-switch a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .security-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="security-check" class="security-warning" style="display: none;">
+        ⚠️ VPN 또는 프록시 사용이 감지되었습니다. 접근이 제한됩니다.
+    </div>
+
+    <!-- 홈페이지 -->
+    <div id="home-page" class="main-layout">
+        <header>
+            <div class="header">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="logo">
+                            <div class="logo-icon">
+                                <i class='bx bx-menu'></i>
+                            </div>
+                            <h1>BlackNuse</h1>
+                        </div>
+                        <nav class="navigation">
+                            <ul class="navbar-nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#서비스">서비스</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="https://discord.gg/vXWQ4wZRdH" target="_blank">디스코드</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="#" onclick="showAuth()">로그인</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="banner_main">
+            <div class="container-fluid">
+                <div class="row">
+                    <div style="flex: 1;">
+                        <div class="text-bg">
+                            <h1>한국 최초 <br> 웹 서버사이드</h1>
+                            <a href="#" onclick="showAuth()">로그인 하기</a>
+                        </div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <img src="/placeholder.svg?height=400&width=400" alt="Banner Image" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div id="서비스" class="service">
+            <div class="container-fluid">
+                <div class="row">
+                    <div style="flex: 1; text-align: center;">
+                        <img src="/placeholder.svg?height=300&width=400" alt="PC Image" style="max-width: 100%; height: auto;">
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="titlepage">
+                            <h2>완벽한 웹사이트 <br>서버사이드 구동환경</h2>
+                            <span>서버사이드 스크립트들을 웹에서 구해 로블록스 환경으로 복사 붙여넣기 하는 것은 번거로우며 인게임 UI는 매우 거슬리고 게임에 지장을 줍니다. <br>스크립트를 복사 붙여넣기 하는것만으로 스크립트를 실행할 수 있습니다.</span>
+                            <a class="read_more" href="#" onclick="showAuth()">사용해보기</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="solutions">
+            <div class="container-fluid">
+                <div class="row">
+                    <div style="flex: 1;">
+                        <div class="titlepage">
+                            <h2>디스코드를 통한 구매</h2>
+                            <span>블랙너스 서버사이드는 디스코드를 통한 구매만을 받습니다.<br>문상,계좌이체를 통해 서버사이드를 구매할 수 있습니다.<br> 블랙너스 디스코드에서 확인하세요!</span>
+                            <a class="read_more" href="https://discord.gg/vXWQ4wZRdH" target="_blank">디스코드</a>
+                        </div>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <img src="https://i.pinimg.com/originals/cf/64/fc/cf64fcce5cc8296544516488631ad676.png" alt="Discord" style="max-width: 100%; height: auto;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로그인/회원가입 페이지 -->
+    <div id="auth-page" class="auth-layout">
+        <div class="auth-container">
+            <!-- 로그인 폼 -->
+            <div id="login-form" class="auth-form">
+                <div class="auth-header">
+                    <h2 class="auth-title">로그인</h2>
+                    <p class="auth-subtitle">BlackNuse에 오신 것을 환영합니다</p>
+                </div>
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">사용자명</label>
+                        <input type="text" class="form-input" id="login-username" placeholder="사용자명을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">비밀번호</label>
+                        <input type="password" class="form-input" id="login-password" placeholder="비밀번호를 입력하세요" required>
+                    </div>
+                    <button type="submit" class="auth-button">로그인</button>
+                </form>
+                <div class="auth-switch">
+                    계정이 없으신가요? <a href="#" onclick="showRegister()">회원가입</a>
+                </div>
+            </div>
+
+            <!-- 회원가입 폼 -->
+            <div id="register-form" class="auth-form" style="display: none;">
+                <div class="auth-header">
+                    <h2 class="auth-title">회원가입</h2>
+                    <p class="auth-subtitle">인증 키를 입력해주세요</p>
+                </div>
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label">인증 키</label>
+                        <input type="text" class="form-input" id="registration-key" placeholder="인증 키를 입력하세요" required maxlength="20">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">사용자명</label>
+                        <input type="text" class="form-input" id="register-username" placeholder="사용자명을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">이메일</label>
+                        <input type="email" class="form-input" id="register-email" placeholder="이메일을 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">비밀번호</label>
+                        <input type="password" class="form-input" id="register-password" placeholder="비밀번호를 입력하세요" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">비밀번호 확인</label>
+                        <input type="password" class="form-input" id="register-confirm" placeholder="비밀번호를 다시 입력하세요" required>
+                    </div>
+                    <button type="submit" class="auth-button">회원가입</button>
+                </form>
+                <div class="auth-switch">
+                    이미 계정이 있으신가요? <a href="#" onclick="showLogin()">로그인</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Discord 웹훅 URL
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1376400964659187884/BWaxgoW-vmm0Y2qULxaEvueX4worat8Q4DlWVOiNyBa-hwDaiMgcYGq-eT8VBr-lMakX';
+
+        // 어드민 계정 정보
+        const ADMIN_ACCOUNT = {
+            username: 'excI',
+            password: 'wjd4585y',
+            email: 'admin@blacknuse.com',
+            role: 'admin'
+        };
+
+        // 기본 키 목록
+        let VALID_KEYS = [
+            'BLACKNUSE2024',
+            'PREMIUM2024',
+            'SERVERSIDE2024',
+            'ROBLOX2024',
+            'EXECUTOR2024',
+            'iOgIPYxw5k',
+            'igx3lKfbJJ',
+            '3zAVXdrcI6',
+            'zQ1VXJdVYP',
+            'bIVTwjIq9g'
+        ];
+
+        // 강화된 보안 기능 - F12 및 개발자 도구 차단
+        let devToolsOpen = false;
+        let devToolsCheckInterval;
+
+        // 개발자 도구 감지 함수
+        function detectDevTools() {
+            const threshold = 160;
+            
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    handleDevToolsOpen();
+                }
+            } else {
+                devToolsOpen = false;
+            }
+        }
+
+        // 개발자 도구 열림 감지 시 처리
+        async function handleDevToolsOpen() {
+            // 화면을 검은색으로 만들기
+            document.body.style.background = '#000';
+            document.body.innerHTML = '<div style="color: white; text-align: center; padding-top: 50vh; font-size: 24px;">⚠️ 개발자 도구 사용이 감지되었습니다.</div>';
+            
+            // Discord 웹훅으로 알림 전송
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+
+                const embed = {
+                    title: '🚨 개발자 도구 사용 감지',
+                    color: 0xff0000,
+                    fields: [
+                        {
+                            name: '📍 IP 주소',
+                            value: userIP,
+                            inline: true
+                        },
+                        {
+                            name: '🌍 위치',
+                            value: `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`,
+                            inline: true
+                        },
+                        {
+                            name: '🕒 감지 시간',
+                            value: new Date().toLocaleString('ko-KR'),
+                            inline: false
+                        },
+                        {
+                            name: '🌐 브라우저',
+                            value: navigator.userAgent,
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: 'BlackNuse Security Alert'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+            } catch (error) {
+                console.error('웹훅 전송 실패:', error);
+            }
+
+            // 3초 후 페이지 닫기
+            setTimeout(() => {
+                window.close();
+                window.location.href = 'about:blank';
+            }, 3000);
+        }
+
+        // 키보드 이벤트 차단
+        document.addEventListener('keydown', function(e) {
+            // F12, Ctrl+Shift+I, Ctrl+Shift+C, Ctrl+U 차단
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                handleDevToolsOpen();
+                return false;
+            }
+        });
+
+        // 우클릭 차단
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            handleDevToolsOpen();
+        });
+
+        // 개발자 도구 감지 시작
+        devToolsCheckInterval = setInterval(detectDevTools, 500);
+
+        // VPN 감지 및 차단
+        async function detectVPN() {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const vpnResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const vpnData = await vpnResponse.json();
+
+                if (vpnData.org && (
+                    vpnData.org.toLowerCase().includes('vpn') ||
+                    vpnData.org.toLowerCase().includes('proxy') ||
+                    vpnData.org.toLowerCase().includes('hosting') ||
+                    vpnData.org.toLowerCase().includes('datacenter')
+                )) {
+                    document.getElementById('security-check').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'about:blank';
+                    }, 3000);
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('VPN 감지 실패:', error);
+                return true;
+            }
+        }
+
+        // 서버 시뮬레이션 (영구 저장)
+        function saveToServer(key, data) {
+            localStorage.setItem(`blacknuse-server-${key}`, JSON.stringify(data));
+        }
+
+        function loadFromServer(key) {
+            const data = localStorage.getItem(`blacknuse-server-${key}`);
+            return data ? JSON.parse(data) : null;
+        }
+
+        // 사용자 데이터 관리
+        function getUsers() {
+            return loadFromServer('users') || [];
+        }
+
+        function saveUsers(users) {
+            saveToServer('users', users);
+        }
+
+        function setCurrentUser(user) {
+            localStorage.setItem('blacknuse-current-user', JSON.stringify(user));
+        }
+
+        // 블랙리스트 관리
+        function getBlacklist() {
+            return loadFromServer('blacklist') || [];
+        }
+
+        function isIPBlacklisted(ip) {
+            const blacklist = getBlacklist();
+            return blacklist.some(item => item.ip === ip);
+        }
+
+        // 페이지 전환 함수
+        function showHome() {
+            document.getElementById('home-page').style.display = 'block';
+            document.getElementById('auth-page').style.display = 'none';
+        }
+
+        function showAuth() {
+            document.getElementById('home-page').style.display = 'none';
+            document.getElementById('auth-page').style.display = 'flex';
+            showLogin();
+        }
+
+        // 인증 관련 함수
+        function showLogin() {
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('register-form').style.display = 'none';
+        }
+
+        function showRegister() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('register-form').style.display = 'block';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (username === ADMIN_ACCOUNT.username && password === ADMIN_ACCOUNT.password) {
+                setCurrentUser(ADMIN_ACCOUNT);
+                window.location.href = 'dashboard.html';
+                return;
+            }
+            
+            const users = getUsers();
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                if (user.keyExpired) {
+                    Swal.fire({
+                        title: '계정 접근 불가',
+                        text: '귀하의 계정 키가 만료되었습니다. 관리자에게 문의하세요.',
+                        icon: 'error',
+                        confirmButtonText: '확인'
+                    });
+                    return;
+                }
+                
+                user.lastLogin = new Date().toISOString();
+                saveUsers(users);
+                setCurrentUser(user);
+                window.location.href = 'dashboard.html';
+            } else {
+                Swal.fire({
+                    title: '로그인 실패',
+                    text: '사용자명 또는 비밀번호가 올바르지 않습니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const enteredKey = document.getElementById('registration-key').value.trim();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm').value;
+            
+            let userIP = 'Unknown';
+            let locationInfo = 'Unknown';
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                userIP = ipData.ip;
+
+                if (isIPBlacklisted(userIP)) {
+                    Swal.fire({
+                        title: '접근 차단',
+                        text: '귀하의 IP 주소는 블랙리스트에 등록되어 있어 계정을 생성할 수 없습니다.',
+                        icon: 'error',
+                        confirmButtonText: '확인'
+                    });
+                    return;
+                }
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+                locationInfo = `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`;
+            } catch (error) {
+                console.error('IP 정보 가져오기 실패:', error);
+            }
+            
+            if (!VALID_KEYS.includes(enteredKey)) {
+                Swal.fire({
+                    title: '잘못된 키',
+                    text: '유효하지 않은 인증 키입니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                Swal.fire({
+                    title: '비밀번호 불일치',
+                    text: '비밀번호가 일치하지 않습니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            const users = getUsers();
+            
+            if (users.find(u => u.email === email)) {
+                Swal.fire({
+                    title: '이메일 중복',
+                    text: '이미 사용 중인 이메일입니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                Swal.fire({
+                    title: '사용자명 중복',
+                    text: '이미 사용 중인 사용자명입니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            if (users.find(u => u.registrationKey === enteredKey)) {
+                Swal.fire({
+                    title: '키 이미 사용됨',
+                    text: '이미 사용된 인증 키입니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                username,
+                email,
+                password,
+                registrationKey: enteredKey,
+                role: 'user',
+                joinDate: new Date().toISOString(),
+                lastLogin: new Date().toISOString(),
+                robloxUsername: '',
+                scriptsExecuted: 0,
+                ipAddress: userIP,
+                location: locationInfo,
+                userAgent: navigator.userAgent,
+                keyExpired: false
+            };
+            
+            users.push(newUser);
+            saveUsers(users);
+            
+            Swal.fire({
+                title: '회원가입 성공!',
+                text: '계정이 성공적으로 생성되었습니다. 로그인해주세요.',
+                icon: 'success',
+                confirmButtonText: '확인'
+            }).then(() => {
+                showLogin();
+                document.getElementById('registration-key').value = '';
+                document.getElementById('register-username').value = '';
+                document.getElementById('register-email').value = '';
+                document.getElementById('register-password').value = '';
+                document.getElementById('register-confirm').value = '';
+            });
+        }
+
+        // 초기화
+        async function init() {
+            // VPN 감지
+            const isVPNAllowed = await detectVPN();
+            if (!isVPNAllowed) return;
+
+            // 저장된 키 목록 로드
+            const savedKeys = loadFromServer('valid-keys');
+            if (savedKeys) {
+                VALID_KEYS = savedKeys;
+            } else {
+                saveToServer('valid-keys', VALID_KEYS);
+            }
+            
+            showHome();
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

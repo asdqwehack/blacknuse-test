@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackNuse - 블랙리스트 관리</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @font-face {
+            font-family: 'KimjungchulGothic-Bold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/KimjungchulGothic-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-primary: #E4E9F7;
+            --bg-secondary: #ffffff;
+            --text-primary: #11101d;
+            --text-secondary: #666;
+            --accent-primary: linear-gradient(135deg, #667eea, #764ba2);
+            --border-color: #ddd;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "KimjungchulGothic-Bold";
+        }
+
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            width: 45px;
+            height: 45px;
+            background: var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .blacklist-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: center;
+        }
+
+        .blacklist-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .blacklist-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            font-family: "KimjungchulGothic-Bold";
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        .button-red { background: linear-gradient(135deg, #ff6b6b, #ee5a52); }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .users-table {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            background: var(--accent-primary);
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .table-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .blacklist-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+            background: rgba(244, 67, 54, 0.05);
+            border-left: 4px solid #f44336;
+        }
+
+        .blacklist-item:hover {
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .blacklist-info h4 {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .blacklist-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.unblacklist { background: #4caf50; color: white; }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .security-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn">
+                <i class='bx bx-home'></i> 홈
+            </a>
+            <a href="dashboard.html" class="nav-btn">
+                <i class='bx bx-dashboard'></i> 대시보드
+            </a>
+            <a href="admin.html" class="nav-btn">
+                <i class='bx bx-crown'></i> 어드민 패널
+            </a>
+            <a href="user-management.html" class="nav-btn">
+                <i class='bx bx-user'></i> 사용자 관리
+            </a>
+        </div>
+
+        <div class="header">
+            <h1>
+                <i class='bx bx-block'></i>
+                블랙리스트 관리
+            </h1>
+        </div>
+
+        <div id="security-check" class="security-warning" style="display: none;">
+            ⚠️ VPN 또는 프록시 사용이 감지되었습니다. 접근이 제한됩니다.
+        </div>
+        
+        <div class="blacklist-controls">
+            <input type="text" class="blacklist-input" id="blacklist-ip-input" placeholder="IP 주소를 입력하세요 (예: 192.168.1.1)">
+            <button class="button button-red" onclick="addIPToBlacklistWithReason()">
+                <i class='bx bx-block'></i>
+                IP 차단
+            </button>
+        </div>
+        
+        <div class="users-table">
+            <div class="table-header">
+                <i class='bx bx-block'></i>
+                블랙리스트 목록
+            </div>
+            <div class="table-content" id="blacklist-list">
+                <!-- 블랙리스트 목록이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Discord 웹훅 URL
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1376400964659187884/BWaxgoW-vmm0Y2qULxaEvueX4worat8Q4DlWVOiNyBa-hwDaiMgcYGq-eT8VBr-lMakX';
+
+        // 강화된 보안 기능
+        let devToolsOpen = false;
+        let devToolsCheckInterval;
+
+        function detectDevTools() {
+            const threshold = 160;
+            
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    handleDevToolsOpen();
+                }
+            } else {
+                devToolsOpen = false;
+            }
+        }
+
+        async function handleDevToolsOpen() {
+            document.body.style.background = '#000';
+            document.body.innerHTML = '<div style="color: white; text-align: center; padding-top: 50vh; font-size: 24px;">⚠️ 개발자 도구 사용이 감지되었습니다.</div>';
+            
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+
+                const embed = {
+                    title: '🚨 블랙리스트 관리 개발자 도구 사용 감지',
+                    color: 0xff0000,
+                    fields: [
+                        {
+                            name: '📍 IP 주소',
+                            value: userIP,
+                            inline: true
+                        },
+                        {
+                            name: '🌍 위치',
+                            value: `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`,
+                            inline: true
+                        },
+                        {
+                            name: '🕒 감지 시간',
+                            value: new Date().toLocaleString('ko-KR'),
+                            inline: false
+                        },
+                        {
+                            name: '🌐 브라우저',
+                            value: navigator.userAgent,
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: 'BlackNuse Blacklist Security Alert'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+            } catch (error) {
+                console.error('웹훅 전송 실패:', error);
+            }
+
+            setTimeout(() => {
+                window.close();
+                window.location.href = 'about:blank';
+            }, 3000);
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                handleDevToolsOpen();
+                return false;
+            }
+        });
+
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            handleDevToolsOpen();
+        });
+
+        devToolsCheckInterval = setInterval(detectDevTools, 500);
+
+        // VPN 감지 및 차단
+        async function detectVPN() {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const vpnResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const vpnData = await vpnResponse.json();
+
+                if (vpnData.org && (
+                    vpnData.org.toLowerCase().includes('vpn') ||
+                    vpnData.org.toLowerCase().includes('proxy') ||
+                    vpnData.org.toLowerCase().includes('hosting') ||
+                    vpnData.org.toLowerCase().includes('datacenter')
+                )) {
+                    document.getElementById('security-check').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'about:blank';
+                    }, 3000);
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('VPN 감지 실패:', error);
+                return true;
+            }
+        }
+
+        // 서버 시뮬레이션
+        function saveToServer(key, data) {
+            localStorage.setItem(`blacknuse-server-${key}`, JSON.stringify(data));
+        }
+
+        function loadFromServer(key) {
+            const data = localStorage.getItem(`blacknuse-server-${key}`);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function getBlacklist() {
+            return loadFromServer('blacklist') || [];
+        }
+
+        function saveBlacklist(blacklist) {
+            saveToServer('blacklist', blacklist);
+        }
+
+        function getUsers() {
+            return loadFromServer('users') || [];
+        }
+
+        function saveUsers(users) {
+            saveToServer('users', users);
+        }
+
+        // Discord 웹훅 전송
+        async function sendToDiscord(title, description, fields = []) {
+            try {
+                const embed = {
+                    title: title,
+                    description: description,
+                    color: 0xf44336,
+                    fields: fields,
+                    footer: {
+                        text: 'BlackNuse Blacklist System'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+            } catch (error) {
+                console.error('Discord 웹훅 전송 실패:', error);
+            }
+        }
+
+        function addIPToBlacklistWithReason() {
+            const ipInput = document.getElementById('blacklist-ip-input');
+            const ip = ipInput.value.trim();
+            
+            if (!ip) {
+                Swal.fire({
+                    title: '입력 오류',
+                    text: 'IP 주소를 입력해주세요.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+            if (!ipRegex.test(ip)) {
+                Swal.fire({
+                    title: '잘못된 형식',
+                    text: '올바른 IP 주소 형식을 입력해주세요. (예: 192.168.1.1)',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+                return;
+            }
+            
+            Swal.fire({
+                title: 'IP 차단 사유',
+                text: '차단 사유를 입력해주세요',
+                input: 'text',
+                inputPlaceholder: '차단 사유를 입력하세요',
+                showCancelButton: true,
+                confirmButtonText: '차단',
+                cancelButtonText: '취소',
+                inputValidator: (value) => {
+                    if (!value) {
+                        return '차단 사유를 입력해주세요!'
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const blacklist = getBlacklist();
+                    const existingItem = blacklist.find(item => item.ip === ip);
+                    
+                    if (!existingItem) {
+                        blacklist.push({
+                            ip: ip,
+                            reason: result.value,
+                            blockedAt: new Date().toISOString(),
+                            blockedBy: 'Admin'
+                        });
+                        saveBlacklist(blacklist);
+                        
+                        ipInput.value = '';
+                        loadBlacklistList();
+                        expireKeysForIP(ip);
+                        
+                        sendToDiscord(
+                            '🚫 IP 블랙리스트 추가',
+                            '새로운 IP가 블랙리스트에 추가되었습니다.',
+                            [
+                                { name: 'IP 주소', value: ip, inline: true },
+                                { name: '차단 사유', value: result.value, inline: true },
+                                { name: '차단 시간', value: new Date().toLocaleString('ko-KR'), inline: false }
+                            ]
+                        );
+                        
+                        Swal.fire({
+                            title: '차단 완료',
+                            text: `IP ${ip}가 블랙리스트에 추가되었습니다.`,
+                            icon: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '이미 차단됨',
+                            text: '해당 IP는 이미 블랙리스트에 있습니다.',
+                            icon: 'warning',
+                            confirmButtonText: '확인'
+                        });
+                    }
+                }
+            });
+        }
+
+        function expireKeysForIP(ip) {
+            let users = getUsers();
+            let expiredCount = 0;
+            
+            users.forEach(user => {
+                if (user.ipAddress === ip) {
+                    user.keyExpired = true;
+                    user.expiredAt = new Date().toISOString();
+                    user.expiredReason = '블랙리스트 IP';
+                    expiredCount++;
+                }
+            });
+            
+            if (expiredCount > 0) {
+                saveUsers(users);
+                
+                Swal.fire({
+                    title: '키 만료 처리',
+                    text: `${expiredCount}개의 계정 키가 만료되었습니다.`,
+                    icon: 'info',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        }
+
+        function removeIPFromBlacklist(ip) {
+            Swal.fire({
+                title: '블랙리스트 해제',
+                text: `정말 IP ${ip}를 블랙리스트에서 해제하시겠습니까?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '해제',
+                cancelButtonText: '취소',
+                confirmButtonColor: '#4caf50'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let blacklist = getBlacklist();
+                    blacklist = blacklist.filter(item => item.ip !== ip);
+                    saveBlacklist(blacklist);
+                    loadBlacklistList();
+
+                    sendToDiscord(
+                        '✅ IP 블랙리스트 해제',
+                        'IP가 블랙리스트에서 해제되었습니다.',
+                        [
+                            { name: 'IP 주소', value: ip, inline: true },
+                            { name: '해제 시간', value: new Date().toLocaleString('ko-KR'), inline: true }
+                        ]
+                    );
+                    
+                    Swal.fire({
+                        title: '해제 완료',
+                        text: `IP ${ip}가 블랙리스트에서 해제되었습니다.`,
+                        icon: 'success',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            });
+        }
+
+        function loadBlacklistList() {
+            const blacklist = getBlacklist();
+            const blacklistList = document.getElementById('blacklist-list');
+            
+            blacklistList.innerHTML = '';
+            
+            if (blacklist.length === 0) {
+                blacklistList.innerHTML = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">블랙리스트가 비어있습니다.</div>';
+                return;
+            }
+            
+            blacklist.forEach(item => {
+                const blacklistItem = document.createElement('div');
+                blacklistItem.className = 'blacklist-item';
+                blacklistItem.innerHTML = `
+                    <div class="blacklist-info">
+                        <h4>${item.ip}</h4>
+                        <p>차단 사유: ${item.reason} • 차단일: ${new Date(item.blockedAt).toLocaleDateString()} • 차단자: ${item.blockedBy}</p>
+                    </div>
+                    <div class="user-actions">
+                        <button class="action-btn unblacklist" onclick="removeIPFromBlacklist('${item.ip}')">
+                            <i class='bx bx-check'></i> 해제
+                        </button>
+                    </div>
+                `;
+                blacklistList.appendChild(blacklistItem);
+            });
+        }
+
+        // 초기화
+        async function init() {
+            // VPN 감지
+            const isVPNAllowed = await detectVPN();
+            if (!isVPNAllowed) return;
+
+            loadBlacklistList();
+        }
+
+        // 페이지 로드 시 초기화
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

