@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlackNuse - 로블록스 계정 관리</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="styles/common.css">
+    <link rel="stylesheet" href="styles/roblox-accounts.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn">
+                <i class='bx bx-home'></i> 홈
+            </a>
+            <a href="dashboard" class="nav-btn">
+                <i class='bx bx-dashboard'></i> 대시보드
+            </a>
+            <a href="games" class="nav-btn">
+                <i class='bx bx-game'></i> 게임 목록
+            </a>
+            <a href="rulesl" class="nav-btn">
+                <i class='bx bx-shield-alt'></i> 규칙
+            </a>
+        </div>
+
+        <div class="header">
+            <h1>
+                <i class="bx bxl-android"></i>
+                로블록스 계정 관리
+            </h1>
+        </div>
+
+        <div id="security-check" class="security-warning" style="display: none;">
+            ⚠️ VPN 또는 프록시 사용이 감지되었습니다. 접근이 제한됩니다.
+        </div>
+
+        <div class="info-section">
+            <h3>
+                <i class='bx bx-info-circle'></i>
+                로블록스 계정 등록 안내
+            </h3>
+            <p><strong>중요:</strong> 로블록스 계정은 한 번만 등록할 수 있으며, 등록 후 해제하면 다시 등록할 수 있습니다.</p>
+            <ul>
+                <li>표시 이름(Display Name)이 아닌 사용자 이름(Username)을 입력해야 합니다.</li>
+                <li>등록된 계정은 서버사이드 스크립트 실행 시 식별에 사용됩니다.</li>
+                <li>계정 정보는 안전하게 암호화되어 저장됩니다.</li>
+                <li>등록 해제 후에는 동일한 계정으로 재등록이 가능합니다.</li>
+            </ul>
+        </div>
+
+        <div class="register-section">
+            <h3>
+                <i class="bx bxl-android"></i>
+                로블록스 계정 등록
+            </h3>
+            <div class="register-form">
+                <div class="form-group">
+                    <label class="form-label">로블록스 사용자 이름</label>
+                    <input type="text" class="form-input" id="roblox-username" placeholder="로블록스 사용자 이름을 입력하세요" maxlength="20">
+                </div>
+                <button class="button button-green" onclick="robloxManager.registerRobloxAccount()">
+                    <i class="bx bxl-android"></i>
+                    계정 등록
+                </button>
+            </div>
+        </div>
+        
+        <div class="users-table">
+            <div class="table-header">
+                <i class="bx bxl-android"></i>
+                등록된 로블록스 계정
+            </div>
+            <div class="table-content" id="roblox-accounts-list">
+                <!-- 로블록스 계정 목록이 여기에 동적으로 추가됩니다 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="js/firebase-config.js"></script>
+    <script src="js/security.js"></script>
+    <script src="js/roblox-accounts.js"></script>
+    <script>
+        let securityManager;
+        let robloxManager;
+
+        async function init() {
+            securityManager = new SecurityManager();
+            await FirebaseDataManager.initializeDefaultData();
+            robloxManager = new RobloxAccountsManager();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
