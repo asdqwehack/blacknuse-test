@@ -1,50 +1,371 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BlackNuse - 로블록스 계정 관리</title>
+    <title>로블록스 계정 관리</title>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="styles/common.css">
-    <link rel="stylesheet" href="styles/roblox-accounts.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database-compat.js"></script>
+    <style>
+        @font-face {
+            font-family: 'KimjungchulGothic-Bold';
+            src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302_01@1.0/KimjungchulGothic-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-style: normal;
+        }
+
+        :root {
+            --bg-primary: #E4E9F7;
+            --bg-secondary: #ffffff;
+            --text-primary: #11101d;
+            --text-secondary: #666;
+            --accent-primary: linear-gradient(135deg, #667eea, #764ba2);
+            --border-color: #ddd;
+            --shadow-light: 0 2px 10px rgba(0,0,0,0.1);
+            --shadow-medium: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "KimjungchulGothic-Bold";
+        }
+
+        body {
+            background: var(--bg-primary);
+            min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            color: var(--text-primary);
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header h1 i {
+            width: 45px;
+            height: 45px;
+            background: var(--accent-primary);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background: var(--accent-primary);
+            color: white;
+            border-color: transparent;
+        }
+
+        .info-section {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .info-section h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-section p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .info-section ul {
+            color: var(--text-secondary);
+            margin-left: 20px;
+        }
+
+        .info-section li {
+            margin-bottom: 8px;
+        }
+
+        .register-section {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .register-section h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .register-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            color: white;
+            font-family: "KimjungchulGothic-Bold";
+            font-size: 15px;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-light);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 130px;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .button-green { background: linear-gradient(135deg, #6bcf7f, #4caf50); }
+
+        .button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-medium);
+        }
+
+        .users-table {
+            background: var(--bg-secondary);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: var(--shadow-light);
+            border: 1px solid var(--border-color);
+            margin-bottom: 30px;
+        }
+
+        .table-header {
+            background: var(--accent-primary);
+            color: white;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .table-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .roblox-account-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .roblox-account-item:hover {
+            background: var(--bg-primary);
+        }
+
+        .roblox-info h4 {
+            color: var(--text-primary);
+            margin-bottom: 5px;
+        }
+
+        .roblox-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .user-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn.view { background: #2196f3; color: white; }
+        .action-btn.deregister { background: #ff9800; color: white; }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .security-warning {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .nav-buttons {
+                justify-content: center;
+            }
+            
+            .register-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .form-group {
+                min-width: auto;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <div class="nav-buttons">
-            <a href="index.html" class="nav-btn">
-                <i class='bx bx-home'></i> 홈
-            </a>
-            <a href="dashboard" class="nav-btn">
-                <i class='bx bx-dashboard'></i> 대시보드
-            </a>
-            <a href="games" class="nav-btn">
-                <i class='bx bx-game'></i> 게임 목록
-            </a>
-            <a href="rulesl" class="nav-btn">
-                <i class='bx bx-shield-alt'></i> 규칙
-            </a>
-        </div>
-
         <div class="header">
-            <h1>
-                <i class="bx bxl-android"></i>
-                로블록스 계정 관리
-            </h1>
+            <h1><i class='bx bx-user'></i> 로블록스 계정 관리</h1>
         </div>
 
-        <div id="security-check" class="security-warning" style="display: none;">
+        <div class="nav-buttons">
+            <a href="index.html" class="nav-btn"><i class='bx bx-home'></i> 홈</a>
+            <a href="dashboard.html" class="nav-btn"><i class='bx bx-bar-chart-alt-2'></i> 대시보드</a>
+            <a href="games.html" class="nav-btn"><i class='bx bx-joystick'></i> 게임 목록</a>
+            <a href="rules.html" class="nav-btn"><i class='bx bx-book'></i> 규칙</a>
+        </div>
+
+        <div class="security-warning" style="display: none;">
             ⚠️ VPN 또는 프록시 사용이 감지되었습니다. 접근이 제한됩니다.
         </div>
 
         <div class="info-section">
-            <h3>
-                <i class='bx bx-info-circle'></i>
-                로블록스 계정 등록 안내
-            </h3>
-            <p><strong>중요:</strong> 로블록스 계정은 한 번만 등록할 수 있으며, 등록 후 해제하면 다시 등록할 수 있습니다.</p>
+            <h3><i class='bx bx-info-circle'></i> 로블록스 계정 등록 안내</h3>
+            <p>중요: 로블록스 계정은 한 번만 등록할 수 있으며, 등록 후 해제하면 다시 등록할 수 있습니다.</p>
             <ul>
                 <li>표시 이름(Display Name)이 아닌 사용자 이름(Username)을 입력해야 합니다.</li>
                 <li>등록된 계정은 서버사이드 스크립트 실행 시 식별에 사용됩니다.</li>
@@ -54,47 +375,310 @@
         </div>
 
         <div class="register-section">
-            <h3>
-                <i class="bx bxl-android"></i>
-                로블록스 계정 등록
-            </h3>
+            <h3><i class='bx bx-user-plus'></i> 로블록스 계정 등록</h3>
             <div class="register-form">
                 <div class="form-group">
-                    <label class="form-label">로블록스 사용자 이름</label>
-                    <input type="text" class="form-input" id="roblox-username" placeholder="로블록스 사용자 이름을 입력하세요" maxlength="20">
+                    <label class="form-label" for="roblox-username">로블록스 사용자 이름</label>
+                    <input type="text" class="form-input" id="roblox-username" placeholder="사용자 이름 입력">
                 </div>
-                <button class="button button-green" onclick="robloxManager.registerRobloxAccount()">
-                    <i class="bx bxl-android"></i>
-                    계정 등록
+                <button class="button button-green" onclick="robloxAccountsManager.registerRobloxAccount()">
+                    <i class='bx bx-check'></i> 계정 등록
                 </button>
             </div>
         </div>
-        
+
         <div class="users-table">
-            <div class="table-header">
-                <i class="bx bxl-android"></i>
-                등록된 로블록스 계정
-            </div>
-            <div class="table-content" id="roblox-accounts-list">
-                <!-- 로블록스 계정 목록이 여기에 동적으로 추가됩니다 -->
-            </div>
+            <div class="table-header">등록된 로블록스 계정</div>
+            <div class="table-content" id="roblox-accounts-list"></div>
         </div>
     </div>
 
-    <script src="js/firebase-config.js"></script>
-    <script src="js/security.js"></script>
-    <script src="js/roblox-accounts.js"></script>
     <script>
-        let securityManager;
-        let robloxManager;
+        // Placeholder for FirebaseDataManager and SecurityManager
+        // These would typically be imported or defined separately
+        const FirebaseDataManager = {
+            getUsers: async () => {
+                // Mock implementation - replace with actual Firebase logic
+                return [];
+            },
+            updateUser: async (id, data) => {
+                // Mock implementation - replace with actual Firebase logic
+                console.log(`Updating user ${id} with`, data);
+            }
+        };
 
-        async function init() {
-            securityManager = new SecurityManager();
-            await FirebaseDataManager.initializeDefaultData();
-            robloxManager = new RobloxAccountsManager();
+        const SecurityManager = {
+            sendToDiscord: async (title, description, fields) => {
+                // Mock implementation - replace with actual Discord webhook logic
+                console.log('Sending to Discord:', { title, description, fields });
+            }
+        };
+
+        class RobloxAccountsManager {
+            constructor() {
+                this.currentUser = null;
+                this.init();
+            }
+
+            async init() {
+                this.currentUser = this.getCurrentUser();
+                if (!this.currentUser) {
+                    window.location.href = "auth.html";
+                    return;
+                }
+
+                this.loadRobloxAccountsList();
+            }
+
+            getCurrentUser() {
+                const user = localStorage.getItem("blacknuse-current-user");
+                return user ? JSON.parse(user) : null;
+            }
+
+            async registerRobloxAccount() {
+                const usernameInput = document.getElementById("roblox-username");
+                const username = usernameInput.value.trim();
+
+                if (!username) {
+                    Swal.fire({
+                        title: "입력 오류",
+                        text: "로블록스 사용자 이름을 입력해주세요.",
+                        icon: "error",
+                        confirmButtonText: "확인",
+                    });
+                    return;
+                }
+
+                if (username.length < 3 || username.length > 20) {
+                    Swal.fire({
+                        title: "잘못된 형식",
+                        text: "로블록스 사용자 이름은 3-20자 사이여야 합니다.",
+                        icon: "error",
+                        confirmButtonText: "확인",
+                    });
+                    return;
+                }
+
+                if (this.currentUser.robloxUsername) {
+                    Swal.fire({
+                        title: "이미 등록됨",
+                        text: `현재 등록된 로블록스 계정: ${this.currentUser.robloxUsername}`,
+                        icon: "info",
+                        showCancelButton: true,
+                        confirmButtonText: "등록 해제",
+                        cancelButtonText: "취소",
+                        confirmButtonColor: "#ff9800",
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            this.unregisterCurrentUser();
+                        }
+                    });
+                    return;
+                }
+
+                const users = await FirebaseDataManager.getUsers();
+                const existingUser = users.find((u) => u.robloxUsername === username);
+                if (existingUser) {
+                    Swal.fire({
+                        title: "이미 사용 중",
+                        text: "해당 로블록스 계정은 이미 다른 사용자가 등록했습니다.",
+                        icon: "error",
+                        confirmButtonText: "확인",
+                    });
+                    return;
+                }
+
+                try {
+                    await FirebaseDataManager.updateUser(this.currentUser.id, {
+                        robloxUsername: username,
+                        robloxRegisteredAt: new Date().toISOString(),
+                    });
+
+                    this.currentUser.robloxUsername = username;
+                    this.currentUser.robloxRegisteredAt = new Date().toISOString();
+                    localStorage.setItem("blacknuse-current-user", JSON.stringify(this.currentUser));
+
+                    usernameInput.value = "";
+                    this.loadRobloxAccountsList();
+
+                    await SecurityManager.sendToDiscord("🎮 로블록스 계정 등록", "새로운 로블록스 계정이 등록되었습니다.", [
+                        { name: "사용자", value: this.currentUser.username, inline: true },
+                        { name: "로블록스 계정", value: username, inline: true },
+                        { name: "등록 시간", value: new Date().toLocaleString("ko-KR"), inline: false },
+                    ]);
+
+                    Swal.fire({
+                        title: "등록 완료!",
+                        text: `로블록스 계정 "${username}"이 성공적으로 등록되었습니다.`,
+                        icon: "success",
+                        confirmButtonText: "확인",
+                    });
+                } catch (error) {
+                    console.error("등록 실패:", error);
+                    Swal.fire({
+                        title: "등록 실패",
+                        text: "로블록스 계정 등록 중 오류가 발생했습니다.",
+                        icon: "error",
+                        confirmButtonText: "확인",
+                    });
+                }
+            }
+
+            async unregisterCurrentUser() {
+                if (!this.currentUser || !this.currentUser.robloxUsername) return;
+
+                const oldUsername = this.currentUser.robloxUsername;
+
+                await FirebaseDataManager.updateUser(this.currentUser.id, {
+                    robloxUsername: "",
+                    robloxUnregisteredAt: new Date().toISOString(),
+                });
+
+                this.currentUser.robloxUsername = "";
+                this.currentUser.robloxUnregisteredAt = new Date().toISOString();
+                localStorage.setItem("blacknuse-current-user", JSON.stringify(this.currentUser));
+
+                this.loadRobloxAccountsList();
+
+                SecurityManager.sendToDiscord("🚫 로블록스 계정 해제", "로블록스 계정이 해제되었습니다.", [
+                    { name: "사용자", value: this.currentUser.username, inline: true },
+                    { name: "해제된 계정", value: oldUsername, inline: true },
+                    { name: "해제 시간", value: new Date().toLocaleString("ko-KR"), inline: false },
+                ]);
+
+                Swal.fire({
+                    title: "해제 완료",
+                    text: "로블록스 계정이 해제되었습니다. 다시 등록할 수 있습니다.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+
+            async unregisterRobloxAccount(userId) {
+                const users = await FirebaseDataManager.getUsers();
+                const user = users.find((u) => u.id === userId);
+                if (!user) return;
+
+                Swal.fire({
+                    title: "로블록스 계정 해제",
+                    text: `정말 ${user.robloxUsername} 계정을 해제하시겠습니까?`,
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "해제",
+                    cancelButtonText: "취소",
+                    confirmButtonColor: "#ff9800",
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        const oldUsername = user.robloxUsername;
+
+                        await FirebaseDataManager.updateUser(userId, {
+                            robloxUsername: "",
+                            robloxUnregisteredAt: new Date().toISOString(),
+                        });
+
+                        if (this.currentUser && this.currentUser.id === userId) {
+                            this.currentUser.robloxUsername = "";
+                            this.currentUser.robloxUnregisteredAt = new Date().toISOString();
+                            localStorage.setItem("blacknuse-current-user", JSON.stringify(this.currentUser));
+                        }
+
+                        this.loadRobloxAccountsList();
+
+                        SecurityManager.sendToDiscord("🚫 관리자 계정 해제", "관리자가 로블록스 계정을 해제했습니다.", [
+                            { name: "대상 사용자", value: user.username, inline: true },
+                            { name: "해제된 계정", value: oldUsername, inline: true },
+                            { name: "해제 시간", value: new Date().toLocaleString("ko-KR"), inline: false },
+                        ]);
+
+                        Swal.fire({
+                            title: "해제 완료",
+                            text: "로블록스 계정이 성공적으로 해제되었습니다.",
+                            icon: "success",
+                            timer: 1500,
+                            showConfirmButton: false,
+                        });
+                    }
+                });
+            }
+
+            async showUserDetail(userId) {
+                const users = await FirebaseDataManager.getUsers();
+                const user = users.find((u) => u.id === userId);
+                if (!user) return;
+
+                Swal.fire({
+                    title: "사용자 상세 정보",
+                    html: `
+                        <div style="text-align: left;">
+                            <p><strong>사용자명:</strong> ${user.username}</p>
+                            <p><strong>이메일:</strong> ${user.email}</p>
+                            <p><strong>로블록스 계정:</strong> ${user.robloxUsername}</p>
+                            <p><strong>등록일:</strong> ${new Date(user.joinDate).toLocaleString()}</p>
+                            <p><strong>로블록스 등록일:</strong> ${
+                                user.robloxRegisteredAt ? new Date(user.robloxRegisteredAt).toLocaleString() : "등록되지 않음"
+                            }</p>
+                            <p><strong>실행한 스크립트 수:</strong> ${user.scriptsExecuted || 0}개</p>
+                        </div>
+                    `,
+                    confirmButtonText: "확인",
+                    width: "500px",
+                });
+            }
+
+            async loadRobloxAccountsList() {
+                const users = await FirebaseDataManager.getUsers();
+                const isAdmin = this.currentUser && this.currentUser.username === "excI" && this.currentUser.role === "admin";
+
+                let robloxUsers;
+                if (isAdmin) {
+                    robloxUsers = users.filter((u) => u.robloxUsername);
+                } else {
+                    robloxUsers = users.filter((u) => u.robloxUsername && u.id === this.currentUser.id);
+                }
+
+                const robloxAccountsList = document.getElementById("roblox-accounts-list");
+
+                robloxAccountsList.innerHTML = "";
+
+                if (robloxUsers.length === 0) {
+                    robloxAccountsList.innerHTML =
+                        '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">등록된 로블록스 계정이 없습니다.</div>';
+                    return;
+                }
+
+                robloxUsers.forEach((user) => {
+                    const accountItem = document.createElement("div");
+                    accountItem.className = "roblox-account-item";
+
+                    const actionButtons = isAdmin
+                        ? `
+                            <div class="user-actions">
+                                <button class="action-btn view" onclick="robloxAccountsManager.showUserDetail(${user.id})">
+                                    <i class='bx bx-show'></i> 상세보기
+                                </button>
+                                <button class="action-btn deregister" onclick="robloxAccountsManager.unregisterRobloxAccount(${user.id})">
+                                    <i class='bx bx-user-x'></i> 등록 해제
+                                </button>
+                            </div>
+                        `
+                        : "";
+
+                    accountItem.innerHTML = `
+                        <div class="roblox-info">
+                            <h4>${user.robloxUsername}</h4>
+                            <p>사용자: ${user.username} • 등록일: ${new Date(
+                                user.robloxRegisteredAt || user.joinDate
+                            ).toLocaleDateString()}</p>
+                        </div>
+                        ${actionButtons}
+                    `;
+                    robloxAccountsList.appendChild(accountItem);
+                });
+            }
         }
 
-        document.addEventListener('DOMContentLoaded', init);
+        window.robloxAccountsManager = new RobloxAccountsManager();
     </script>
 </body>
 </html>
